@@ -53,6 +53,7 @@
 
 /* ─────────────────────────── base ─────────────────────────── */
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -372,6 +373,9 @@ textarea.pastebox { min-height: 150px; }
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55);
   display: flex; align-items: center; justify-content: center; padding: 18px; z-index: 90;
+}
+.modal-overlay[hidden] {
+  display: none !important;
 }
 .modal {
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;

@@ -33,9 +33,22 @@
   tabMessage.addEventListener('click', function () { setMode('message'); updateAnalyzeState(); });
   tabEmail.addEventListener('click', function () { setMode('email'); updateAnalyzeState(); });
 
+  [tabMessage, tabEmail].forEach(function (tab) {
+    tab.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var target = tab === tabMessage ? tabEmail : tabMessage;
+        target.focus();
+        target.click();
+      }
+    });
+  });
+
   /* ──────────────────────── analyze enable state ─────────────────── */
   [msgText, emBody, emSubject, emSender, msgPhone].forEach(function (el) {
-    el.addEventListener('input', updateAnalyzeState);
+    ['input', 'paste', 'change'].forEach(function (evt) {
+      el.addEventListener(evt, function () { setTimeout(updateAnalyzeState, 0); });
+    });
   });
 
   function hasInput() {
@@ -249,6 +262,19 @@
     });
   });
 
+  /* Language toggle in header */
+  var langBtn = $('langBtn');
+  if (langBtn) {
+    langBtn.addEventListener('click', function () {
+      var codes = ['en', 'hi', 'te'];
+      var curr = SCAM.lang();
+      var next = codes[(codes.indexOf(curr) + 1) % codes.length];
+      SCAM.setLang(next);
+      refreshAttackFilter();
+      SCAM.UI.toast(t('settings.language') + ': ' + (next === 'en' ? 'English' : next === 'hi' ? 'हिन्दी' : 'తెలుగు'));
+    });
+  }
+
   /* ─────────────────────────── theme ────────────────────────────── */
   var themeBtn = $('themeBtn'), themeIcon = $('themeIcon');
   function applyTheme(theme) {
@@ -271,6 +297,11 @@
 
   /* ─────────────────────────── clear data ───────────────────────── */
   var confirmOverlay = $('confirmOverlay');
+  confirmOverlay.addEventListener('click', function (e) {
+    if (e.target === confirmOverlay) {
+      confirmOverlay.hidden = true;
+    }
+  });
   function confirmClear() {
     return new Promise(function (resolve) {
       confirmOverlay.hidden = false;

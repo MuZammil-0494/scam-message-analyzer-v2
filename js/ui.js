@@ -456,6 +456,8 @@
 
     list.innerHTML = '';
     var hasBothFilters = filterLevel !== 'all' || filterAttack !== 'all';
+    var sec = document.getElementById('historySection');
+    if (sec) sec.hidden = all.length === 0;
     empty.hidden = all.length !== 0;
     var noMatch = el('p', 'empty');
     noMatch.textContent = t('history.noMatch');
@@ -491,6 +493,7 @@
       });
       li.appendChild(open); li.appendChild(del);
       li.addEventListener('click', function (e) { if (e.target === li || e.target.closest('.history-main')) goTo(r); });
+      li.addEventListener('keydown', function (e) { if (e.key === 'Enter') goTo(r); });
       li.tabIndex = 0;
       list.appendChild(li);
     });
@@ -545,7 +548,11 @@
       sum.appendChild(document.createTextNode(' ' + item.title));
       det.appendChild(sum);
       det.appendChild(el('p', 'learn-body', item.body));
-      det.appendChild(el('p', 'learn-example', '<span class="learn-example-label">' + t('learn.example') + ':</span> ' + item.example));
+      var ex = el('p', 'learn-example');
+      var exLbl = el('span', 'learn-example-label', t('learn.example') + ': ');
+      ex.appendChild(exLbl);
+      ex.appendChild(document.createTextNode(item.example));
+      det.appendChild(ex);
       list.appendChild(det);
     });
   }
