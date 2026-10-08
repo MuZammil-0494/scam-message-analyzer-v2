@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scam Analyzer — test runner</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #10182c; color: #edf1f8; }
+  h1 { font-size: 1.3rem; }
+  .card { border: 1px solid #2c3a5c; border-radius: 10px; padding: 8px 12px; margin: 6px 0; background: #172036; }
+  .ok { border-left: 4px solid #2E7D51; }
+  .bad { border-left: 4px solid #B23B2E; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border-bottom: 1px solid #2c3a5c; padding: 5px 8px; text-align: left; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<h1>Scam Message Analyzer — scoring test runner</h1>
+<p id="summary">Running…</p>
+<div id="out"></div>
+
+<script src="../js/rules.js"></script>
+<script src="../js/links.js"></script>
+<script src="../js/email.js"></script>
+<script src="../js/scoring.js"></script>
+<script src="samples.js"></script>
+<script>
+var pass = 0, fail = 0, rows = [];
+SAMPLES.forEach(function (s) {
+  var r;
+  try { r = SCAM.analyze(s.input); } catch (e) {
+    fail++; rows.push({ name: s.name, ok: false, notes: ['CRASH: ' + e.message] }); return;
+  }
+  var notes = [];
+  if (s.minScore !== undefined && r.score < s.minScore) notes.push('score ' + r.score + '<' + s.minScore);
+  if (s.maxScore !== undefined && r.score > s.maxScore) notes.push('score ' + r.score + '>' + s.maxScore);
+  if (s.expectLevels && s.expectLevels.indexOf(r.level.id) === -1) notes.push('level ' + r.level.id);
+  var ids = r.attacks.map(function (a) { return a.id; });
+  (s.expectAttacks || []).forEach(function (id) { if (ids.indexOf(id) === -1) notes.push('missing ' + id); });
+  (s.noFalse || []).forEach(function (id) { if (ids.indexOf(id) !== -1) notes.push('false ' + id); });
+  if (notes.length) { fail++; rows.push({ name: s.name, ok: false, notes: notes, r: r }); }
+  else { pass++; rows.push({ name: s.name, ok: true, notes: [], r: r }); }
+});
+var el = document.getElementById('out');
+document.getElementById('summary').textContent = pass + ' passed, ' + fail + ' failed';
+var tbl = document.createElement('table');
+tbl.innerHTML = '<tr><th>✓/✕</th><th>Sample</th><th>Score</th><th>Level</th><th>Attacks found</th><th>Notes</th></tr>';
+rows.forEach(function (row) {
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>' + (row.ok ? '✓' : '✕') + '</td><td>' + row.name + '</td><td>' +
+    (row.r ? row.r.score : '–') + '</td><td>' + (row.r ? row.r.level.id : '–') + '</td><td>' +
+    (row.r ? row.r.attacks.map(function (a) { return a.id + ' (' + a.confidence + '%)'; }).join(', ') : '') +
+    '</td><td>' + row.notes.join('; ') + '</td>';
+  tbl.appendChild(tr);
+});
+el.appendChild(tbl);
+</script>
+</body>
+</html>

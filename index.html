@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Scam Message Analyzer — check a suspicious message before you act</title>
+<meta name="description" content="Paste a suspicious email, SMS or WhatsApp message and instantly see whether it is a scam, how risky it is, which attack it is, and exactly what to do next. Runs entirely in your browser." />
+<meta name="theme-color" content="#10182c" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to the main content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🛡️</span>
+      <span class="brand-text">
+        <strong data-i18n="brand.name">Scam Message Analyzer</strong>
+        <span class="brand-sub" data-i18n="brand.tag">Check before you click</span>
+      </span>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn tiny" id="langBtn" aria-label="Change language"><span aria-hidden="true">🌐</span> <span id="langLabel">EN</span></button>
+      <button type="button" class="btn tiny" id="themeBtn" aria-label="Switch between dark and light mode"><span aria-hidden="true" id="themeIcon">☀️</span></button>
+      <button type="button" class="btn tiny" id="settingsBtn" aria-haspopup="dialog"><span aria-hidden="true">⚙️</span> <span data-i18n="nav.settings">Settings</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <!-- ─────────────────────────── HERO ─────────────────────────── -->
+  <section class="hero">
+    <h1 data-i18n="hero.title">Is this message a scam?</h1>
+    <p class="promise" data-i18n="hero.promise">Paste it below. In two seconds you will know the risk, the exact type of attack, and what to do next — in plain words.</p>
+    <p class="privacy-note"><span aria-hidden="true">🔒</span> <span data-i18n="hero.privacy">Private by design: your message never leaves this device. Nothing is uploaded and nothing is stored on a server.</span></p>
+  </section>
+
+  <!-- ────────────────────────── ANALYZER ───────────────────────── -->
+  <section class="card analyzer" aria-labelledby="analyzerHeading">
+    <h2 class="sr-only" id="analyzerHeading" data-i18n="analyzer.heading">Message analyzer</h2>
+
+    <div class="tabs" role="tablist" aria-label="Choose analyzer type">
+      <button type="button" class="tab" role="tab" id="tabMessage" aria-controls="panelMessage" aria-selected="true" data-mode="message">
+        <span aria-hidden="true">💬</span> <span data-i18n="tab.message">Text / WhatsApp / Telegram</span>
+      </button>
+      <button type="button" class="tab" role="tab" id="tabEmail" aria-controls="panelEmail" aria-selected="false" tabindex="-1" data-mode="email">
+        <span aria-hidden="true">✉️</span> <span data-i18n="tab.email">Email</span>
+      </button>
+    </div>
+
+    <!-- Message panel -->
+    <div id="panelMessage" role="tabpanel" aria-labelledby="tabMessage" class="tab-panel">
+      <div class="field">
+        <label for="msgPhone" data-i18n="form.phone">Sender number (optional)</label>
+        <input type="text" id="msgPhone" autocomplete="off" inputmode="tel" placeholder="+91 98765 43210" data-i18n-ph="form.phonePh" />
+      </div>
+      <div class="field">
+        <label for="msgText" data-i18n="form.message">The suspicious message</label>
+        <textarea id="msgText" rows="7" class="pastebox"
+          placeholder="Paste the SMS, WhatsApp or Telegram message here…"
+          data-i18n-ph="form.messagePh"></textarea>
+      </div>
+    </div>
+
+    <!-- Email panel -->
+    <div id="panelEmail" role="tabpanel" aria-labelledby="tabEmail" class="tab-panel" hidden>
+      <div class="field-row">
+        <div class="field">
+          <label for="emSender" data-i18n="form.sender">From (sender address)</label>
+          <input type="text" id="emSender" autocomplete="off" placeholder="Support &lt;security@paypa1.com&gt;" />
+        </div>
+        <div class="field">
+          <label for="emReplyTo" data-i18n="form.replyTo">Reply-To (optional)</label>
+          <input type="text" id="emReplyTo" autocomplete="off" placeholder="helpdesk@other-domain.ru" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="emSubject" data-i18n="form.subject">Subject</label>
+        <input type="text" id="emSubject" autocomplete="off" placeholder="Your account will be suspended today"
+          data-i18n-ph="form.subjectPh" />
+      </div>
+      <div class="field">
+        <label for="emBody" data-i18n="form.body">Body</label>
+        <textarea id="emBody" rows="6" class="pastebox"
+          placeholder="Paste the email body here…"
+          data-i18n-ph="form.bodyPh"></textarea>
+      </div>
+      <details class="advanced">
+        <summary data-i18n="form.headersToggle">Show: raw email headers (optional, for SPF / DKIM / DMARC)</summary>
+        <div class="field">
+          <label for="emHeaders" class="sr-only" data-i18n="form.headers">Raw headers</label>
+          <textarea id="emHeaders" rows="4" class="pastebox mono" placeholder="Received-SPF: fail (example.com)&#10;Authentication-Results: mx.example.com; dkim=fail; spf=fail; dmarc=fail"></textarea>
+        </div>
+      </details>
+    </div>
+
+    <!-- Samples -->
+    <div class="samples">
+      <span class="samples-label" data-i18n="form.samples">Try a sample:</span>
+      <button type="button" class="chip" data-sample="kyc" data-i18n="sample.kyc">Fake bank KYC</button>
+      <button type="button" class="chip" data-sample="otp" data-i18n="sample.otp">OTP theft</button>
+      <button type="button" class="chip" data-sample="job" data-i18n="sample.job">Fake job</button>
+      <button type="button" class="chip" data-sample="upi" data-i18n="sample.upi">UPI refund</button>
+      <button type="button" class="chip" data-sample="ceo" data-i18n="sample.ceo">CEO fraud</button>
+      <button type="button" class="chip" data-sample="netflix" data-i18n="sample.netflix">Fake Netflix email</button>
+      <button type="button" class="chip" data-sample="safe" data-i18n="sample.safe">A normal message</button>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn primary" id="analyzeBtn" disabled>
+        <span id="analyzeLabel" data-i18n="btn.analyze">Analyze message</span>
+      </button>
+      <button type="button" class="btn ghost" id="clearBtn" data-i18n="btn.clear">Clear</button>
+    </div>
+    <p class="hint" data-i18n="form.batchHint">Tip: paste several messages separated by a line with “---” to compare them all at once.</p>
+
+    <div class="analyzing" id="analyzeState" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="analyzeStep" aria-live="polite">Reading your message…</p>
+    </div>
+    <p class="error-msg" id="errorMsg" role="alert" hidden></p>
+  </section>
+
+  <!-- ─────────────────────────── RESULTS ───────────────────────── -->
+  <section id="results" class="results" hidden aria-labelledby="resultsHeading">
+    <h2 class="sr-only" id="resultsHeading" data-i18n="results.heading">Analysis results</h2>
+    <div id="resultsBody"></div>
+  </section>
+
+  <!-- ─────────────────────────── HISTORY ───────────────────────── -->
+  <section id="historySection" class="card section" hidden aria-labelledby="historyHeading">
+    <div class="section-head">
+      <h2 id="historyHeading" data-i18n="history.heading">This session's checks</h2>
+      <button type="button" class="btn tiny danger" id="clearDataBtn" data-i18n="history.clear">Clear all data</button>
+    </div>
+
+    <div class="filters" role="group" aria-label="Filters">
+      <label class="sr-only" for="filterLevel" data-i18n="history.filterLevel">Filter by risk level</label>
+      <select id="filterLevel">
+        <option value="all" data-i18n="history.allLevels">All risk levels</option>
+        <option value="critical" data-i18n="level.critical">Critical</option>
+        <option value="high" data-i18n="level.high">High risk</option>
+        <option value="medium" data-i18n="level.medium">Medium risk</option>
+        <option value="low" data-i18n="level.low">Low risk</option>
+        <option value="safe" data-i18n="level.safe">Safe</option>
+      </select>
+
+      <label class="sr-only" for="filterAttack" data-i18n="history.filterAttack">Filter by attack type</label>
+      <select id="filterAttack"><option value="all" data-i18n="history.allAttacks">All attack types</option></select>
+
+      <label class="sr-only" for="sortOrder" data-i18n="history.sort">Sort</label>
+      <select id="sortOrder">
+        <option value="risk" data-i18n="history.sortRisk">Risk: highest first</option>
+        <option value="newest" data-i18n="history.sortNewest">Newest first</option>
+        <option value="oldest" data-i18n="history.sortOldest">Oldest first</option>
+        <option value="lowest" data-i18n="history.sortLowest">Risk: lowest first</option>
+      </select>
+    </div>
+
+    <ol class="history-list" id="historyList"></ol>
+    <p class="empty" id="historyEmpty" data-i18n="history.empty">Nothing here yet. Analyze a message and it will be saved in this browser only.</p>
+  </section>
+
+  <!-- ──────────────────────────── STATS ────────────────────────── -->
+  <section id="statsSection" class="card section" hidden aria-labelledby="statsHeading">
+    <h2 id="statsHeading" data-i18n="stats.heading">Your session at a glance</h2>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="charts">
+      <div class="chart-box">
+        <h3 data-i18n="stats.byLevel">Risk levels</h3>
+        <div id="chartLevels" class="bar-chart" role="img" aria-label="Bar chart of results by risk level"></div>
+      </div>
+      <div class="chart-box">
+        <h3 data-i18n="stats.byAttack">Most common attack types</h3>
+        <div id="chartAttacks" class="bar-chart" role="img" aria-label="Bar chart of most common attack types"></div>
+      </div>
+    </div>
+    <div class="chart-box wide">
+      <h3 data-i18n="stats.timeline">Timeline of checks</h3>
+      <div id="chartTimeline" class="timeline-chart" role="img" aria-label="Timeline of checks"></div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── LEARN ────────────────────────── -->
+  <section class="card section" aria-labelledby="learnHeading">
+    <h2 id="learnHeading" data-i18n="learn.heading">10 scam tricks — and how to spot them</h2>
+    <p class="section-sub" data-i18n="learn.sub">Two minutes here will save you a lot of worry later.</p>
+    <div class="learn-list" id="learnList"></div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="disclaimer"><strong data-i18n="footer.disclaimerTitle">Disclaimer:</strong> <span data-i18n="footer.disclaimer">This tool gives guidance, not a guarantee. It cannot know everything about a message. When in doubt, contact the company or bank directly using the number on their official website or app.</span></p>
+    <p class="footer-links">
+      <button type="button" class="linklike" id="privacyBtn" data-i18n="footer.privacy">How your data is handled</button>
+      <span aria-hidden="true">·</span>
+      <button type="button" class="linklike" id="aboutBtn" data-i18n="footer.about">About this tool</button>
+      <span aria-hidden="true">·</span>
+      <button type="button" class="linklike" id="installBtn" hidden data-i18n="footer.install">Install as an app</button>
+    </p>
+    <p class="fine" data-i18n="footer.fine">Runs 100% in your browser. No accounts, no tracking, no server storage.</p>
+  </div>
+</footer>
+
+<!-- ─────────────────────────── SETTINGS ────────────────────────── -->
+<div class="modal-overlay" id="settingsOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle" data-i18n="settings.title">Settings</h2>
+
+    <fieldset class="settings-block">
+      <legend data-i18n="settings.language">Language</legend>
+      <div class="seg" id="langSeg">
+        <button type="button" class="seg-btn" data-lang="en">English</button>
+        <button type="button" class="seg-btn" data-lang="hi">हिन्दी</button>
+        <button type="button" class="seg-btn" data-lang="te">తెలుగు</button>
+      </div>
+      <p class="fine" data-i18n="settings.languageNote">More languages can be added — untranslated strings fall back to English.</p>
+    </fieldset>
+
+    <fieldset class="settings-block">
+      <legend data-i18n="settings.aiTitle">Optional AI second opinion</legend>
+      <p class="fine" data-i18n="settings.aiWarn">Off by default. If you turn this on, the message text will be sent to the AI provider you choose, using your own key. Without a key, everything stays on this device.</p>
+      <label class="check"><input type="checkbox" id="aiEnabled" /> <span data-i18n="settings.aiEnable">Enable AI second opinion</span></label>
+      <label for="aiProvider" data-i18n="settings.aiProvider">Provider</label>
+      <select id="aiProvider">
+        <option value="gemini">Google Gemini</option>
+        <option value="anthropic">Anthropic Claude</option>
+      </select>
+      <label for="aiKey" data-i18n="settings.aiKey">Your API key (stored only in this browser)</label>
+      <input type="password" id="aiKey" autocomplete="off" placeholder="…" />
+      <p class="fine"><span aria-hidden="true">⚠️</span> <span data-i18n="settings.aiKeyNote">Never share this key. It is saved in this browser's local storage only and is sent only to the provider you selected.</span></p>
+    </fieldset>
+
+    <fieldset class="settings-block">
+      <legend data-i18n="settings.dataTitle">Your data</legend>
+      <p class="fine" data-i18n="settings.dataNote">Analysis history is saved in this browser only (localStorage). Nothing is sent anywhere.</p>
+      <button type="button" class="btn tiny danger" id="clearDataBtn2" data-i18n="history.clear">Clear all data</button>
+    </fieldset>
+
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="settingsClose" data-i18n="btn.close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────── INFO MODAL ──────────────────────── -->
+<div class="modal-overlay" id="infoOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <h2 id="infoTitle"></h2>
+    <div id="infoBody" class="modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="infoClose" data-i18n="btn.close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────── CONFIRM ─────────────────────────── -->
+<div class="modal-overlay" id="confirmOverlay" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h2 id="confirmTitle" data-i18n="confirm.title">Clear all data?</h2>
+    <div class="modal-body"><p data-i18n="confirm.body">This deletes the analysis history and settings stored in this browser. It cannot be undone.</p></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="confirmNo" data-i18n="btn.cancel">Cancel</button>
+      <button type="button" class="btn danger-solid" id="confirmYes" data-i18n="btn.clearAll">Yes, clear everything</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="js/i18n.js"></script>
+<script src="js/rules.js"></script>
+<script src="js/links.js"></script>
+<script src="js/email.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/history.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
