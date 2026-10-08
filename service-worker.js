@@ -1,4 +1,4 @@
-const CACHE_NAME = "scam-analyzer-v2";
+const CACHE_NAME = "scam-analyzer-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -20,7 +20,9 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(ASSETS.map((url) => cache.add(url).catch(() => null)))
+    )
   );
   self.skipWaiting();
 });
@@ -42,7 +44,48 @@ self.addEventListener("fetch", (event) => {
   if (/^https?:\/\/(generativelanguage\.googleapis|api\.anthropic\.com)/i.test(url.href)) {
     return;
   }
+  if (event.request.method !== "GET") return;
+
+  const isNavigation =
+    event.request.mode === "navigate" ||
+    url.pathname.endsWith("/") ||
+    url.pathname.endsWith(".html");
+
+  if (isNavigation) {
+    // Pages are network-first so a new deploy always reaches the user.
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(event.request, copy));
+            // Keep bundled assets in step with the fresh HTML.
+            caches
+              .open(CACHE_NAME)
+              .then((c) => Promise.all(ASSETS.map((a) => c.add(a).catch(() => null))));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(event.request).then((r) => r || caches.match("./index.html"))
+        )
+    );
+    return;
+  }
+
+  // Static assets: serve from cache instantly, refresh in the background.
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request)
+        .then((res) => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(event.request, copy));
+          }
+          return res;
+        })
+        .catch(() => cached);
+      return cached || network;
+    })
   );
 });

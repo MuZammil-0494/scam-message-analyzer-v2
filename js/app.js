@@ -360,6 +360,12 @@
   window.addEventListener('appinstalled', function () { installBtn.hidden = true; });
 
   if ('serviceWorker' in navigator) {
+    /* Reload once when an updated worker takes over, so fixes actually appear. */
+    var hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadController) { hadController = true; return; }
+      window.location.reload();
+    });
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('service-worker.js').catch(function () {});
     });
